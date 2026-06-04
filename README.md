@@ -2,13 +2,21 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
 
 ## Getting Started
 
-First, run the development server:
+First, install de dependenc
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
+pnpm install
+```
+
+Second, generate the primsa info
+
+```bash
+pnpm prisma generate 
+```
+
+Tertiary, run the development server:
+
+```bash
 pnpm dev
 # or
 bun dev
