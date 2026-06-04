@@ -1,0 +1,184 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// =========================
+// ENUMS
+// =========================
+
+enum UserRole {
+  ADMIN
+  USER
+}
+
+// =========================
+// USER
+// =========================
+
+model User {
+  id        String   @id @default(cuid())
+  name      String
+  email     String   @unique
+  password  String?
+  role      UserRole @default(USER)
+
+  tickets   Ticket[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// =========================
+// CLIENT
+// =========================
+
+model Client {
+  id        String   @id @default(cuid())
+
+  name      String
+  phone     String?
+  email     String?
+
+  tickets   Ticket[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// =========================
+// FAIR
+// =========================
+
+model Fair {
+  id         String   @id @default(cuid())
+
+  name       String
+  location   String?
+
+  startDate  DateTime?
+  endDate    DateTime?
+
+  tickets    Ticket[]
+
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+// =========================
+// CATEGORY
+// =========================
+
+model Category {
+  id        String   @id @default(cuid())
+
+  name      String   @unique
+  slug      String   @unique
+
+  products  Product[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// =========================
+// PRODUCT
+// =========================
+
+model Product {
+  id          String   @id @default(cuid())
+
+  name        String
+  description String?
+
+  sku         String   @unique
+
+  stock       Int      @default(0)
+
+  price       Decimal
+
+  width       Float?
+  height      Float?
+  depth       Float?
+  weight      Float?
+
+  imageUrl    String[]
+
+  isActive    Boolean  @default(true)
+
+  categoryId  String
+  category    Category @relation( fields: [categoryId], references: [id], onDelete: Restrict)
+
+  ticketItems TicketItem[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([categoryId])
+  @@index([sku])
+}
+
+// =========================
+// TICKET
+// =========================
+
+model Ticket {
+  id           String   @id @default(cuid())
+
+  ticketNumber String   @unique
+
+  total        Decimal
+
+  notes        String?
+
+  clientId     String?
+  client       Client?  @relation( fields: [clientId], references: [id], onDelete: Restrict )
+
+  fairId       String?
+  fair         Fair?    @relation( fields: [fairId], references: [id], onDelete: Restrict )
+
+  userId       String
+  user         User     @relation( fields: [userId], references: [id], onDelete: Restrict )
+
+  items        TicketItem[]
+
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([clientId])
+  @@index([fairId])
+  @@index([userId])
+}
+
+// =========================
+// TICKET ITEM
+// =========================
+
+model TicketItem {
+  id         String   @id @default(cuid())
+
+  quantity   Int
+
+  unitPrice  Decimal
+  subtotal   Decimal
+
+  ticketId   String
+  ticket     Ticket   @relation( fields: [ticketId], references: [id], onDelete: Cascade )
+
+  productId  String
+  product    Product  @relation( fields: [productId], references: [id], onDelete: Restrict )
+
+  createdAt  DateTime @default(now())
+
+  @@index([ticketId])
+  @@index([productId])
+}
