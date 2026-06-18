@@ -26,10 +26,10 @@ enum UserRole {
 // =========================
 
 model User {
-  id        String   @id @default(cuid())
-  name      String
-  email     String   @unique
-  password  String?
+  id        Int      @id @default(autoincrement())
+  name      String   @db.VarChar(255)
+  email     String   @unique @db.VarChar(255)
+  password  String?  @db.VarChar(255)
   role      UserRole @default(USER)
 
   tickets   Ticket[]
@@ -43,11 +43,11 @@ model User {
 // =========================
 
 model Client {
-  id        String   @id @default(cuid())
+  id        Int     @id @default(autoincrement())
 
-  name      String
-  phone     String?
-  email     String?
+  name      String  @db.VarChar(255)
+  phone     String? @db.VarChar(20)
+  email     String? @db.VarChar(255)
 
   tickets   Ticket[]
 
@@ -60,18 +60,18 @@ model Client {
 // =========================
 
 model Fair {
-  id         String   @id @default(cuid())
+  id        Int     @id @default(autoincrement())
 
-  name       String
-  location   String?
+  name      String  @db.VarChar(255)
+  location  String? @db.VarChar(255)
 
-  startDate  DateTime?
-  endDate    DateTime?
+  startDate DateTime?
+  endDate   DateTime?
 
-  tickets    Ticket[]
+  tickets   Ticket[]
 
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 // =========================
@@ -79,10 +79,10 @@ model Fair {
 // =========================
 
 model Category {
-  id        String   @id @default(cuid())
+  id        Int     @id @default(autoincrement())
 
-  name      String   @unique
-  slug      String   @unique
+  name      String  @unique @db.VarChar(255)
+  slug      String  @unique @db.VarChar(255)
 
   products  Product[]
 
@@ -95,16 +95,16 @@ model Category {
 // =========================
 
 model Product {
-  id          String   @id @default(cuid())
+  id          Int      @id @default(autoincrement())
 
-  name        String
+  name        String   @db.VarChar(255)
   description String?
 
-  sku         String   @unique
+  sku         String   @unique @db.VarChar(255)
 
   stock       Int      @default(0)
 
-  price       Decimal
+  price       Decimal  @db.Decimal(10, 2)
 
   width       Float?
   height      Float?
@@ -115,10 +115,13 @@ model Product {
 
   isActive    Boolean  @default(true)
 
-  categoryId  String
-  category    Category @relation( fields: [categoryId], references: [id], onDelete: Restrict)
+  categoryId  Int
+  category    Category @relation(fields: [categoryId], references: [id], onDelete: Restrict)
 
   ticketItems TicketItem[]
+
+  woodId      Int?
+  wood        Wood?    @relation(fields: [woodId], references: [id])
 
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -132,22 +135,22 @@ model Product {
 // =========================
 
 model Ticket {
-  id           String   @id @default(cuid())
+  id           Int     @id @default(autoincrement())
 
-  ticketNumber String   @unique
+  ticketNumber String  @unique @db.VarChar(255)
 
-  total        Decimal
+  total        Decimal @db.Decimal(10, 2)
 
   notes        String?
 
-  clientId     String?
-  client       Client?  @relation( fields: [clientId], references: [id], onDelete: Restrict )
+  clientId     Int?
+  client       Client? @relation(fields: [clientId], references: [id], onDelete: Restrict)
 
-  fairId       String?
-  fair         Fair?    @relation( fields: [fairId], references: [id], onDelete: Restrict )
+  fairId       Int?
+  fair         Fair?   @relation(fields: [fairId], references: [id], onDelete: Restrict)
 
-  userId       String
-  user         User     @relation( fields: [userId], references: [id], onDelete: Restrict )
+  userId       Int
+  user         User    @relation(fields: [userId], references: [id], onDelete: Restrict)
 
   items        TicketItem[]
 
@@ -164,21 +167,31 @@ model Ticket {
 // =========================
 
 model TicketItem {
-  id         String   @id @default(cuid())
+  id        Int     @id @default(autoincrement())
 
-  quantity   Int
+  quantity  Int
 
-  unitPrice  Decimal
-  subtotal   Decimal
+  unitPrice Decimal @db.Decimal(10, 2)
+  subtotal  Decimal @db.Decimal(10, 2)
 
-  ticketId   String
-  ticket     Ticket   @relation( fields: [ticketId], references: [id], onDelete: Cascade )
+  ticketId  Int
+  ticket    Ticket  @relation(fields: [ticketId], references: [id], onDelete: Cascade)
 
-  productId  String
-  product    Product  @relation( fields: [productId], references: [id], onDelete: Restrict )
+  productId Int
+  product   Product @relation(fields: [productId], references: [id], onDelete: Restrict)
 
-  createdAt  DateTime @default(now())
+  createdAt DateTime @default(now())
 
   @@index([ticketId])
   @@index([productId])
+}
+
+model Wood {
+  id          Int      @id @default(autoincrement())
+  name        String   @db.VarChar(255)
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  products    Product[]
 }

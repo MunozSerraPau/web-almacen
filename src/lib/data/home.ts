@@ -1,20 +1,20 @@
-import { prisma } from "@/lib/prisma"     // ajusta la ruta a tu singleton
+import { prisma } from "@/lib/prisma"
 
 export type HomeProduct = {
-  id: string
+  id: number
   name: string
   description: string | null
   price: string
   imageUrl: string[]
   category: {
-    id: string
+    id: number
     name: string
     slug: string
   }
 }
 
 export type HomeCategory = {
-  id: string
+  id: number
   name: string
   slug: string
 }
